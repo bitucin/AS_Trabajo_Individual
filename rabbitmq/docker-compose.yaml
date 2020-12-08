@@ -1,0 +1,42 @@
+version: '2.1'
+
+services:
+
+  #Contenedor rabbitmq --> Servidor
+  rabbitmq:
+    image: 'rabbitmq:3.6-management-alpine'
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    restart: always
+    network_mode: "host"
+
+  #Contenedor consumer --> Cliente que recibe mensajes
+  consumer:
+
+    #Op1: Creando contenedor desde imagen en DockerHub
+    image: docker.io/bitucin/rabbitmq-consumer:latest
+
+    #Op2: Creando contenedor desde el Dockerfile de la maquina local
+    #build: consumer 
+
+    environment:
+      AMQP_URL: 'amqp://rabbitmq?connection_attempts=5&retry_delay=5'
+    depends_on:
+      - rabbitmq
+    network_mode: "host"
+
+  #Contenedor publisher --> Cliente que envia mensajes
+  publisher:
+
+    #Op1: Creando contenedor desde imagen en DockerHub
+    image: docker.io/bitucin/rabbitmq-publisher:latest
+
+    #Op2: Creando contenedor desde el Dockerfile de la maquina local
+    #build: publisher
+
+    environment:
+      AMQP_URL: 'amqp://rabbitmq?connection_attempts=5&retry_delay=5'
+    depends_on:
+      - rabbitmq
+    network_mode: "host"
